@@ -62,8 +62,9 @@ router.get("/todayRecord", authMiddleware, async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+
 // get the records date wise
-router.post("/allRecords", authMiddleware, async (req, res) => {
+router.get("/allRecords", authMiddleware, async (req, res) => {
   try {
     const date = req.query.date as string;
 

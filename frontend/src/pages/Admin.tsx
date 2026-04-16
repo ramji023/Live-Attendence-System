@@ -1,60 +1,76 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket/socket";
+import { useAuthStore } from "../store/useAuthStore";
+import axios from "axios";
 
-type Employee = {
-  id: string;
-  name: string;
-  status: "IN" | "OUT";
-  checkIn?: string;
-  checkOut?: string;
-  date: string; // YYYY-MM-DD
+type Record = {
+  employeeId: {
+    name: string;
+    email: string;
+  };
+  checkInTime?: string;
+  checkOutTime?: string;
 };
 
 export default function AdminDashboard() {
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  // store date select by admin
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
+  const user = useAuthStore((s) => s.user);
+  const [toast, setToast] = useState<string | null>(null); // store live updates
+  const [records, setRecords] = useState<Record[]>([]);
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE">("ALL"); // to sort the employee based on selected filter
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // write function to fetch the updated records
+  const fetchRecords = async (selectedDate?: string) => {
+    try {
+      const token = useAuthStore.getState().user?.token;
+
+      const res = await axios.get(
+        `http://localhost:3000/api/v1/attendence/allRecords?date=${
+          selectedDate || date
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setRecords(res.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // write effect to fetch the records while mount the component
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
   // listen for attendence-updated event
   useEffect(() => {
     socket.on("attendance-updated", (data) => {
       console.log("Admin update:", data);
-
       // update ui
+      setToast(data.message);
+      // fetch updated data
+      fetchRecords();
+      // clear the time interval
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      // hide message after 3 sec
+      timerRef.current = setTimeout(() => {
+        setToast(null);
+      }, 3000);
     });
 
     return () => {
       socket.off("attendance-updated");
     };
   }, []);
-
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE">("ALL"); // to sort the employee based on selected filter
-  // store date select by admin
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
-
-  //   dummy data
-  const employees: Employee[] = [
-    {
-      id: "1",
-      name: "Ram",
-      status: "IN",
-      checkIn: "09:10 AM",
-      date: "2026-04-16",
-    },
-    {
-      id: "2",
-      name: "Amit",
-      status: "OUT",
-      checkIn: "09:00 AM",
-      checkOut: "05:30 PM",
-      date: "2026-04-16",
-    },
-    {
-      id: "3",
-      name: "Priya",
-      status: "IN",
-      checkIn: "10:15 AM",
-      date: "2026-04-15",
-    },
-  ];
 
   // format today date and day
   const today = new Date(selectedDate);
@@ -65,14 +81,12 @@ export default function AdminDashboard() {
     year: "numeric",
   });
 
-  //filtering logic based on date and time
-  const filteredData = employees.filter((emp) => {
-    const matchDate = emp.date === selectedDate;
-    const matchStatus = statusFilter === "ALL" || emp.status === "IN";
-
-    return matchDate && matchStatus;
+  const filteredRecords = records.filter((rec) => {
+    if (statusFilter === "ACTIVE") {
+      return rec.checkInTime && !rec.checkOutTime;
+    }
+    return true;
   });
-
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-indigo-50 px-6 md:px-20 py-10">
       {/* header */}
@@ -91,8 +105,11 @@ export default function AdminDashboard() {
           {/* date selection input by default (today date) */}
           <input
             type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              fetchRecords(e.target.value);
+            }}
             className="px-4 py-2 rounded-xl border bg-white shadow-sm focus:ring-2 focus:ring-indigo-300 outline-none"
           />
 
@@ -128,64 +145,54 @@ export default function AdminDashboard() {
         <div className="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
           <h2 className="font-semibold text-gray-700">Employee Attendance</h2>
           <span className="text-sm text-gray-500">
-            {filteredData.length} Records
+            {records.length} Records
           </span>
         </div>
 
         {/* table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="text-gray-500 text-sm">
-              <tr>
-                <th className="px-6 py-4">Employee</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Check In</th>
-                <th className="px-6 py-4">Check Out</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredData.map((emp) => (
-                <tr
-                  key={emp.id}
-                  className="border-t hover:bg-gray-50 transition"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {emp.name}
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full font-medium ${
-                        emp.status === "IN"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {emp.status === "IN" ? "Active" : "Checked Out"}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 text-gray-600">
-                    {emp.checkIn || "-"}
-                  </td>
-
-                  <td className="px-6 py-4 text-gray-600">
-                    {emp.checkOut || "-"}
-                  </td>
+          {filteredRecords.length === 0 ? (
+            <p>No records found</p>
+          ) : (
+            <table className="w-full mt-6 border rounded-xl overflow-hidden">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Email</th>
+                  <th className="p-3 text-left">Check In</th>
+                  <th className="p-3 text-left">Check Out</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
 
-          {/* empty state */}
-          {filteredData.length === 0 && (
-            <div className="text-center py-10 text-gray-500">
-              No attendance data for selected filters
-            </div>
+              <tbody>
+                {filteredRecords.map((rec, i) => (
+                  <tr key={i} className="border-t hover:bg-gray-50">
+                    <td className="p-3">{rec.employeeId.name}</td>
+                    <td className="p-3">{rec.employeeId.email}</td>
+
+                    <td className="p-3">
+                      {rec.checkInTime
+                        ? new Date(rec.checkInTime).toLocaleTimeString()
+                        : "-"}
+                    </td>
+
+                    <td className="p-3">
+                      {rec.checkOutTime
+                        ? new Date(rec.checkOutTime).toLocaleTimeString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
+      {toast && (
+        <div className="fixed top-5 right-5 bg-indigo-600 text-white px-5 py-3 rounded-xl shadow-lg animate-slide-in">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

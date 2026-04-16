@@ -123,6 +123,7 @@ export const initWebSocketServer = (httpServer: HttpServer) => {
             employeeId,
             action,
             time: new Date(),
+            message: `Employee ${employeeId} checked ${action}`
           });
         } catch (error) {
           console.error(error);
