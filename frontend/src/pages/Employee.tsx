@@ -111,72 +111,143 @@ export default function Employee() {
     });
   };
 
+  const statusLabel = attendance?.checkedOut
+    ? "Checked Out"
+    : attendance?.checkedIn
+      ? "Checked In"
+      : "Not Checked In";
+
+  const lastActivity = attendance?.checkedOut
+    ? new Date(attendance.checkOutTime!).toLocaleTimeString([], {
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+      } as any)
+    : attendance?.checkedIn
+      ? new Date(attendance.checkInTime!).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : null;
+
   if (!user) return null;
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-blue-50 px-80 py-10">
-      {/* date */}
-      <p className="text-gray-500 text-sm">
-        {day}, {date}
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb] p-6">
+      <main className="w-full max-w-2xl space-y-8">
+        {/* header */}
+        <header className="space-y-1">
+          <p className="text-[#45464d] font-medium tracking-tight">
+            {day}, {date}
+          </p>
+          <h1 className="text-4xl md:text-5xl font-extrabold font-headline text-[#191c1e] tracking-tight">
+            Good morning, {user.name}
+          </h1>
+        </header>
 
-      {/* welcome */}
-      <h1 className="text-3xl md:text-4xl font-semibold text-gray-800 mt-2">
-        Welcome back, <span className="text-indigo-600">{user.name}</span> 👋
-      </h1>
+        {/* time card */}
+        <section className="relative overflow-hidden rounded-3xl bg-[#497cff] p-12 text-white shadow-2xl shadow-[#497cff]/20">
+          <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full" />
+          <div className="relative z-10 flex flex-col items-center justify-center text-center">
+            <span className="text-lg font-medium tracking-[0.2em] uppercase text-white/60 mb-2">
+              Current Time
+            </span>
+            <div className="text-7xl md:text-8xl font-extrabold font-headline tracking-tighter mb-4">
+              {time}
+            </div>
+            <div className="text-white/80 font-medium text-sm">
+              {!attendance?.checkedIn && "Mark your attendance"}
+              {attendance?.checkedIn && !attendance?.checkedOut && (
+                <>
+                  Checked in at{" "}
+                  {new Date(attendance.checkInTime!).toLocaleTimeString()}
+                </>
+              )}
+              {attendance?.checkedOut && (
+                <>
+                  Checked in at{" "}
+                  {new Date(attendance.checkInTime!).toLocaleTimeString()} ·
+                  Checked out at{" "}
+                  {new Date(attendance.checkOutTime!).toLocaleTimeString()}
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
-      {/* time card */}
-      <div className="mt-8 bg-linear-to-r from-indigo-500 via-blue-500 to-purple-500 text-white rounded-3xl shadow-2xl p-10 md:p-14 flex flex-col items-center justify-center">
-        <p className="text-lg opacity-80 mb-2">Current Time</p>
-
-        <h2 className="text-6xl md:text-7xl font-bold tracking-wide">{time}</h2>
-
-        <p className="mt-4 text-sm opacity-80">
-          {!attendance?.checkedIn && "Mark your attendance"}
-
-          {attendance?.checkedIn && !attendance?.checkedOut && (
-            <>
-              Checked in at{" "}
-              {new Date(attendance.checkInTime!).toLocaleTimeString()}
-            </>
-          )}
-
-          {attendance?.checkedOut && (
-            <>
-              Checked in at{" "}
-              {new Date(attendance.checkInTime!).toLocaleTimeString()} | Checked
-              out at {new Date(attendance.checkOutTime!).toLocaleTimeString()}
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* buttons */}
-      <div className="mt-10 flex flex-col md:flex-row gap-4">
-        {/* check-in */}
-        {!attendance?.checkedIn && (
+        {/* action button */}
+        <section className="grid grid-cols-2 gap-6">
           <button
-            onClick={handleCheckIn}
-            className="flex-1 py-4 rounded-2xl font-medium text-lg bg-green-500 hover:bg-green-600 text-white hover:scale-[1.02]"
+            onClick={!attendance?.checkedIn ? handleCheckIn : undefined}
+            disabled={!!attendance?.checkedIn}
+            className="relative flex items-center gap-3 justify-center p-4 bg-white rounded-3xl shadow-sm transition-all duration-300 overflow-hidden
+      disabled:opacity-50 disabled:cursor-not-allowed
+      enabled:hover:shadow-xl enabled:hover:-translate-y-1 enabled:active:scale-[0.98]"
           >
-            Check In
+            {!attendance?.checkedIn && (
+              <span className="absolute inset-0 rounded-3xl animate-ping bg-green-200 opacity-30" />
+            )}
+            <span className="relative z-10 w-3 h-3 rounded-full bg-green-400" />
+            <h3 className="relative z-10 text-xl font-bold font-headline text-[#191c1e]">
+              Check In
+            </h3>
           </button>
+
+          <button
+            onClick={
+              attendance?.checkedIn && !attendance?.checkedOut
+                ? handleCheckOut
+                : undefined
+            }
+            disabled={!attendance?.checkedIn || !!attendance?.checkedOut}
+            className="relative flex items-center gap-3 justify-center p-4 bg-white rounded-3xl shadow-sm transition-all duration-300 overflow-hidden
+      disabled:opacity-50 disabled:cursor-not-allowed
+      enabled:hover:shadow-xl enabled:hover:-translate-y-1 enabled:active:scale-[0.98]"
+          >
+            {attendance?.checkedIn && !attendance?.checkedOut && (
+              <span className="absolute inset-0 rounded-3xl animate-ping bg-red-200 opacity-30" />
+            )}
+            <span className="relative z-10 w-3 h-3 rounded-full bg-red-400" />
+            <h3 className="relative z-10 text-xl font-bold font-headline text-[#191c1e]">
+              Check Out
+            </h3>
+          </button>
+        </section>
+
+        {/* status bar */}
+        {lastActivity && (
+          <section>
+            <div className="flex items-center gap-4 bg-white px-6 py-4 rounded-full shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#497cff] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#497cff]" />
+                </span>
+                <span className="font-semibold text-[#191c1e]">
+                  {statusLabel}
+                </span>
+              </div>
+              {lastActivity && (
+                <>
+                  <div className="h-6 w-px bg-[#c6c6cd]/30 mx-2" />
+                  <div className="text-sm text-[#45464d]">
+                    Last activity:{" "}
+                    <span className="text-[#191c1e] font-medium">
+                      {lastActivity}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
         )}
 
-        {/* check-out */}
-        {attendance?.checkedIn && !attendance?.checkedOut && (
-          <button
-            onClick={handleCheckOut}
-            className="flex-1 py-4 rounded-2xl font-medium text-lg bg-red-500 hover:bg-red-600 text-white hover:scale-[1.02]"
-          >
-            Check Out
-          </button>
+        {/* toast message */}
+        {message && (
+          <div className="px-4 py-4 rounded-2xl bg-white text-[#191c1e] text-sm text-center shadow-sm border border-[#dbe1ff]">
+            {message}
+          </div>
         )}
-      </div>
-      {message && (
-        <div className="mt-4 px-4 py-4 rounded-xl bg-green-100 text-green-700 text-sm text-center shadow">
-          {message}
-        </div>
-      )}
+      </main>
     </div>
   );
 }

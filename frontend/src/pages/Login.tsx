@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.ts";
 import { socket } from "../socket/socket.ts";
+import { User, UserStar } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -58,101 +59,117 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-100 via-white to-blue-100 px-4">
-      {/* card   */}
-      <div className="w-full max-w-md backdrop-blur-xl bg-white/70 border border-white/40 shadow-2xl rounded-3xl p-8">
-        {/* title  */}
-        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-2">
-          Welcome Back
-        </h2>
-        <p className="text-center text-gray-500 mb-6 text-sm">
-          Login to your attendance dashboard
-        </p>
+    <div className="font-body min-h-screen flex items-center justify-center bg-[#f7f9fb] p-6">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-[0_20px_40px_rgba(11,28,48,0.06)] p-4 md:p-12">
+        {/* Header */}
+        <div className="mb-7 text-center">
+          <h2 className="text-3xl font-headline font-bold text-[#191c1e] mb-2">
+            Welcome back
+          </h2>
+          <p className="text-[#45464d] text-sm">
+            Please enter your credentials to access the portal.
+          </p>
+        </div>
 
-        {/* role toggle button */}
-        <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
+        {/* Toggle */}
+        <div className="flex p-1 bg-[#f2f4f6] rounded-2xl mb-6">
           <button
+            type="button"
             onClick={() => setRole("employee")}
-            className={`w-1/2 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold transition ${
               role === "employee"
-                ? "bg-white shadow text-indigo-600"
-                : "text-gray-500"
+                ? "bg-white shadow-sm text-[#497cff]"
+                : "text-[#45464d] hover:text-black"
             }`}
           >
-            Employee
+            <div className="flex items-center justify-center gap-2">
+              <User size={16} />
+              Employee
+            </div>
           </button>
+
           <button
+            type="button"
             onClick={() => setRole("admin")}
-            className={`w-1/2 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition ${
               role === "admin"
-                ? "bg-white shadow text-indigo-600"
-                : "text-gray-500"
+                ? "bg-white shadow-sm text-[#497cff]"
+                : "text-[#45464d] hover:text-black"
             }`}
           >
-            Admin
+            <div className="flex items-center justify-center gap-2">
+              <UserStar size={16} />
+              Admin
+            </div>
           </button>
         </div>
 
-        {/* form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* name */}
-          <div className="relative">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Full Name */}
+          <div>
+            <label className="text-xs font-bold uppercase text-[#45464d] ml-1">
+              Full Name
+            </label>
             <input
               type="text"
               name="name"
               value={form.name}
               onChange={handleChange}
+              placeholder="username"
               required
-              className="peer w-full px-4 pt-5 pb-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
+              className="w-full px-4 py-3 bg-[#f2f4f6] border-b-2 border-transparent focus:border-[#0053db] rounded-t-xl outline-none"
             />
-            <label className="absolute left-4 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm">
-              Full Name
-            </label>
           </div>
 
           {/* Email */}
-          <div className="relative">
+          <div>
+            <label className="text-xs font-bold uppercase text-[#45464d] ml-1">
+              Work Email or ID
+            </label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
+              placeholder="name@ethereal.pro"
               required
-              className="peer w-full px-4 pt-5 pb-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
+              className="w-full px-4 py-3 bg-[#f2f4f6] border-b-2 border-transparent focus:border-[#0053db] rounded-t-xl outline-none"
             />
-            <label className="absolute left-4 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm">
-              Email Address
-            </label>
           </div>
 
           {/* Password */}
-          <div className="relative">
+          <div>
+            <label className="text-xs font-bold uppercase text-[#45464d]">
+              Password
+            </label>
             <input
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
+              placeholder="••••••••"
               required
-              className="peer w-full px-4 pt-5 pb-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
+              className="w-full px-4 py-3 bg-[#f2f4f6] border-b-2 border-transparent focus:border-[#0053db] rounded-t-xl outline-none"
             />
-            <label className="absolute left-4 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm">
-              Password
-            </label>
           </div>
 
-          {/* button */}
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-linear-to-r from-indigo-500 to-blue-600 text-white font-medium shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+            className="w-full py-3 bg-[#00174b] text-white font-bold rounded-xl hover:opacity-90 transition"
           >
             Login
           </button>
         </form>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Secure employee attendance system
-        </p>
+        {/* Info */}
+        <div className="mt-10 p-4 bg-[#dbe1ff] rounded-2xl text-sm">
+          <p className="font-semibold text-[#00174b]">Demo</p>
+          <p className="text-[#38485d] text-xs">
+            admin_email : admin@example.com
+          </p>
+        </div>
       </div>
     </div>
   );

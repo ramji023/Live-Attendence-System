@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@theme {
+  --font-body: "Inter", sans-serif;
+  --font-label: "inter", sans-serif;
+  --font-headline: "Manrope", sans-serif;
+}
