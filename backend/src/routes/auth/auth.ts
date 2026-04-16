@@ -5,8 +5,6 @@ import { Employee } from "../../models/employee";
 // initialize express router
 const router = Router();
 
-
-
 // login route to authenticate employee and admin
 router.post("/login", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -23,12 +21,16 @@ router.post("/login", async (req: Request, res: Response) => {
   // and assign a new token to client
   const token = jwt.sign(
     { id: employee._id, role: employee.role },
-    process.env.JWT_SECRET!,
+    process.env.JWT_SECRET ?? "your_secret_key",
     { expiresIn: "1d" },
   );
 
   // and return the token,role and name to client
-  res.json({ token, role: employee.role, name: employee.name });
+  res.json({
+    token,
+    role: employee.role,
+    user: { name: employee.name, email: employee.email },
+  });
 });
 
 export default router;
