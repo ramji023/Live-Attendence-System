@@ -1,6 +1,12 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore.ts";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const setUser = useAuthStore((s) => s.setUser);
+
   // state to store user role
   const [role, setRole] = useState<"employee" | "admin">("employee");
   // state to store form data and set by default empty string
@@ -16,9 +22,32 @@ export default function Login() {
   };
 
   // when user click to submit button then console the data
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ role, ...form });
+    try {
+      const res = await axios.post("http://localhost:3000/api/auth/login", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+
+      console.log("Success:", res.data);
+
+      setUser({
+        name: res.data.user.name,
+        email: res.data.user.email,
+        role: res.data.role,
+      });
+
+      if (res.data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/employee");
+      }
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+      alert(error.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -60,21 +89,19 @@ export default function Login() {
         {/* form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* name */}
-          {role === "employee" && (
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="peer w-full px-4 pt-5 pb-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
-              />
-              <label className="absolute left-4 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm">
-                Full Name
-              </label>
-            </div>
-          )}
+          <div className="relative">
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="peer w-full px-4 pt-5 pb-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
+            />
+            <label className="absolute left-4 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm">
+              Full Name
+            </label>
+          </div>
 
           {/* Email */}
           <div className="relative">
