@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.ts";
+import { socket } from "../socket/socket.ts";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,6 +41,12 @@ export default function Login() {
         role: res.data.role,
       });
 
+      socket.auth = {
+        employeeId: res.data.user.email,
+        role: res.data.role,
+      };
+
+      socket.connect();
       if (res.data.role === "admin") {
         navigate("/admin");
       } else if (res.data.role === "employee") {

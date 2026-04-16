@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { socket } from "../socket/socket";
 
 type Employee = {
   id: string;
@@ -10,6 +11,20 @@ type Employee = {
 };
 
 export default function AdminDashboard() {
+  // listen for attendence-updated event
+  useEffect(() => {
+    socket.on("attendance-updated", (data) => {
+      console.log("Admin update:", data);
+
+      // update ui
+    });
+
+    return () => {
+      socket.off("attendance-updated");
+    };
+  }, []);
+
+  
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE">("ALL"); // to sort the employee based on selected filter
   // store date select by admin
   const [selectedDate, setSelectedDate] = useState<string>(

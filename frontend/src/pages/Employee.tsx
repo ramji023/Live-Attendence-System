@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import axios from "axios";
+import { socket } from "../socket/socket";
 
 export default function Employee() {
   const user = useAuthStore((s) => s.user);
 
   console.log(user); // console user
   const [time, setTime] = useState("");
-
+  const [message, setMessage] = useState<string | null>(null); // listen socket-io response
   // store employee value
   const [attendance, setAttendance] = useState<{
     checkedIn: boolean;
@@ -60,6 +61,20 @@ export default function Employee() {
     return () => clearInterval(interval);
   }, []);
 
+  // listen for socket.io response
+  useEffect(() => {
+    // listen for attendence-status event
+    socket.on("attendance-status", (data) => {
+      console.log(data);
+
+      //update ui
+    });
+
+    return () => {
+      socket.off("attendance-status");
+    };
+  }, []);
+
   // format the day and date
   const today = new Date();
   const day = today.toLocaleDateString("en-US", { weekday: "long" });
@@ -71,14 +86,20 @@ export default function Employee() {
 
   // check-in handler
   const handleCheckIn = () => {
-    // setStatus("IN");
     console.log("Checked IN");
+    socket.emit("mark-attendance", {
+      employeeId: user?.email,
+      action: "IN",
+    });
   };
 
   // check-out handler
   const handleCheckOut = () => {
-    // setStatus("OUT");
     console.log("Checked OUT");
+    socket.emit("mark-attendance", {
+      employeeId: user?.email,
+      action: "OUT",
+    });
   };
 
   if (!user) return null;
