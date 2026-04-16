@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import axios from "axios";
 import { socket } from "../socket/socket";
@@ -9,6 +9,7 @@ export default function Employee() {
   console.log(user); // console user
   const [time, setTime] = useState("");
   const [message, setMessage] = useState<string | null>(null); // listen socket-io response
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // store employee value
   const [attendance, setAttendance] = useState<{
     checkedIn: boolean;
@@ -18,26 +19,25 @@ export default function Employee() {
   } | null>(null);
 
   // when component mount then send request to server to check employee status
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const token = useAuthStore.getState().user?.token;
+  const fetchStatus = async () => {
+    try {
+      const token = useAuthStore.getState().user?.token;
 
-        const res = await axios.get(
-          "http://localhost:3000/api/v1/attendence/status",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+      const res = await axios.get(
+        "http://localhost:3000/api/v1/attendence/status",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        },
+      );
 
-        setAttendance(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
+      setAttendance(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
     fetchStatus();
   }, []);
 
@@ -67,7 +67,18 @@ export default function Employee() {
     socket.on("attendance-status", (data) => {
       console.log(data);
 
-      //update ui
+      //store messages
+      setMessage(data.message);
+      //re-fetch status
+      fetchStatus();
+      // clear the time interval
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      // hide message after 3 sec
+      timerRef.current = setTimeout(() => {
+        setMessage(null);
+      }, 3000);
     });
 
     return () => {
@@ -88,7 +99,6 @@ export default function Employee() {
   const handleCheckIn = () => {
     console.log("Checked IN");
     socket.emit("mark-attendance", {
-      employeeId: user?.email,
       action: "IN",
     });
   };
@@ -97,7 +107,6 @@ export default function Employee() {
   const handleCheckOut = () => {
     console.log("Checked OUT");
     socket.emit("mark-attendance", {
-      employeeId: user?.email,
       action: "OUT",
     });
   };
@@ -163,6 +172,11 @@ export default function Employee() {
           </button>
         )}
       </div>
+      {message && (
+        <div className="mt-4 px-4 py-4 rounded-xl bg-green-100 text-green-700 text-sm text-center shadow">
+          {message}
+        </div>
+      )}
     </div>
   );
 }

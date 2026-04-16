@@ -42,8 +42,7 @@ export default function Login() {
       });
 
       socket.auth = {
-        employeeId: res.data.user.email,
-        role: res.data.role,
+        token: res.data.token,
       };
 
       socket.connect();

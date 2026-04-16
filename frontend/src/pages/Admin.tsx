@@ -24,7 +24,6 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE">("ALL"); // to sort the employee based on selected filter
   // store date select by admin
   const [selectedDate, setSelectedDate] = useState<string>(
