@@ -1,10 +1,44 @@
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import axios from "axios";
 
 export default function Employee() {
-  const [time, setTime] = useState("");
-  const [status, setStatus] = useState<"IN" | "OUT" | null>(null);
+  const user = useAuthStore((s) => s.user);
 
-  const name = "Ram"; // later from auth
+  console.log(user); // console user
+  const [time, setTime] = useState("");
+
+  // store employee value
+  const [attendance, setAttendance] = useState<{
+    checkedIn: boolean;
+    checkedOut: boolean;
+    checkInTime: string | null;
+    checkOutTime: string | null;
+  } | null>(null);
+
+  // when component mount then send request to server to check employee status
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const token = useAuthStore.getState().user?.token;
+
+        const res = await axios.get(
+          "http://localhost:3000/api/v1/attendence/status",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        setAttendance(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchStatus();
+  }, []);
 
   // live clock timer
   useEffect(() => {
@@ -37,16 +71,17 @@ export default function Employee() {
 
   // check-in handler
   const handleCheckIn = () => {
-    setStatus("IN");
+    // setStatus("IN");
     console.log("Checked IN");
   };
 
   // check-out handler
   const handleCheckOut = () => {
-    setStatus("OUT");
+    // setStatus("OUT");
     console.log("Checked OUT");
   };
 
+  if (!user) return null;
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-blue-50 px-80 py-10">
       {/* date */}
@@ -56,7 +91,7 @@ export default function Employee() {
 
       {/* welcome */}
       <h1 className="text-3xl md:text-4xl font-semibold text-gray-800 mt-2">
-        Welcome back, <span className="text-indigo-600">{name}</span> 👋
+        Welcome back, <span className="text-indigo-600">{user.name}</span> 👋
       </h1>
 
       {/* time card */}
@@ -66,39 +101,46 @@ export default function Employee() {
         <h2 className="text-6xl md:text-7xl font-bold tracking-wide">{time}</h2>
 
         <p className="mt-4 text-sm opacity-80">
-          {status === "IN" && "You are checked in"}
-          {status === "OUT" && "You are checked out"}
-          {!status && "Mark your attendance"}
+          {!attendance?.checkedIn && "Mark your attendance"}
+
+          {attendance?.checkedIn && !attendance?.checkedOut && (
+            <>
+              Checked in at{" "}
+              {new Date(attendance.checkInTime!).toLocaleTimeString()}
+            </>
+          )}
+
+          {attendance?.checkedOut && (
+            <>
+              Checked in at{" "}
+              {new Date(attendance.checkInTime!).toLocaleTimeString()} | Checked
+              out at {new Date(attendance.checkOutTime!).toLocaleTimeString()}
+            </>
+          )}
         </p>
       </div>
 
       {/* buttons */}
       <div className="mt-10 flex flex-col md:flex-row gap-4">
-        {/*check-in */}
-        <button
-          onClick={handleCheckIn}
-          disabled={status === "IN"}
-          className={`flex-1 py-4 rounded-2xl font-medium text-lg transition-all shadow-md ${
-            status === "IN"
-              ? "bg-green-200 text-green-700 cursor-not-allowed"
-              : "bg-green-500 hover:bg-green-600 text-white hover:scale-[1.02]"
-          }`}
-        >
-          Check In
-        </button>
+        {/* check-in */}
+        {!attendance?.checkedIn && (
+          <button
+            onClick={handleCheckIn}
+            className="flex-1 py-4 rounded-2xl font-medium text-lg bg-green-500 hover:bg-green-600 text-white hover:scale-[1.02]"
+          >
+            Check In
+          </button>
+        )}
 
-        {/* check-out*/}
-        <button
-          onClick={handleCheckOut}
-          disabled={status === "OUT" || status === null}
-          className={`flex-1 py-4 rounded-2xl font-medium text-lg transition-all shadow-md ${
-            status === "OUT" || status === null
-              ? "bg-red-200 text-red-700 cursor-not-allowed"
-              : "bg-red-500 hover:bg-red-600 text-white hover:scale-[1.02]"
-          }`}
-        >
-          Check Out
-        </button>
+        {/* check-out */}
+        {attendance?.checkedIn && !attendance?.checkedOut && (
+          <button
+            onClick={handleCheckOut}
+            className="flex-1 py-4 rounded-2xl font-medium text-lg bg-red-500 hover:bg-red-600 text-white hover:scale-[1.02]"
+          >
+            Check Out
+          </button>
+        )}
       </div>
     </div>
   );

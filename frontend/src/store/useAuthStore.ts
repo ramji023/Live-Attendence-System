@@ -4,6 +4,7 @@ type User = {
   name: string;
   email: string;
   role: "admin" | "employee";
+  token:string;
 };
 
 type AuthState = {

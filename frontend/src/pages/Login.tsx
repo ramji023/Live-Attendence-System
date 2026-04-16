@@ -25,7 +25,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/login", {
+      const res = await axios.post("http://localhost:3000/api/v1/auth/login", {
         name: form.name,
         email: form.email,
         password: form.password,
@@ -34,6 +34,7 @@ export default function Login() {
       console.log("Success:", res.data);
 
       setUser({
+        token: res.data.token,
         name: res.data.user.name,
         email: res.data.user.email,
         role: res.data.role,
@@ -41,7 +42,7 @@ export default function Login() {
 
       if (res.data.role === "admin") {
         navigate("/admin");
-      } else {
+      } else if (res.data.role === "employee") {
         navigate("/employee");
       }
     } catch (error: any) {
