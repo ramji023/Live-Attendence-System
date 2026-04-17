@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import axios from "axios";
 import { socket } from "../socket/socket";
+import { Toast } from "../components/Toast";
+import NotFound from "./NotFound";
 
 export default function Employee() {
   const user = useAuthStore((s) => s.user);
@@ -17,6 +19,8 @@ export default function Employee() {
     checkInTime: string | null;
     checkOutTime: string | null;
   } | null>(null);
+
+  const [showToast, setShowToast] = useState(false);
 
   // when component mount then send request to server to check employee status
   const fetchStatus = async () => {
@@ -69,6 +73,7 @@ export default function Employee() {
 
       //store messages
       setMessage(data.message);
+      setShowToast(true);
       //re-fetch status
       fetchStatus();
       // clear the time interval
@@ -78,7 +83,8 @@ export default function Employee() {
       // hide message after 3 sec
       timerRef.current = setTimeout(() => {
         setMessage(null);
-      }, 3000);
+        setShowToast(false);
+      }, 5000);
     });
 
     return () => {
@@ -130,9 +136,9 @@ export default function Employee() {
         })
       : null;
 
-  if (!user) return null;
+  if (!user) return <NotFound />;
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb] p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb] p-6 overflow-hidden">
       <main className="w-full max-w-2xl space-y-8">
         {/* header */}
         <header className="space-y-1">
@@ -219,8 +225,20 @@ export default function Employee() {
             <div className="flex items-center gap-4 bg-white px-6 py-4 rounded-full shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#497cff] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#497cff]" />
+                  <span
+                    className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                      statusLabel === "Checked In"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={`relative inline-flex rounded-full h-3 w-3 ${
+                      statusLabel === "Checked In"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
                 </span>
                 <span className="font-semibold text-[#191c1e]">
                   {statusLabel}
@@ -242,9 +260,9 @@ export default function Employee() {
         )}
 
         {/* toast message */}
-        {message && (
-          <div className="px-4 py-4 rounded-2xl bg-white text-[#191c1e] text-sm text-center shadow-sm border border-[#dbe1ff]">
-            {message}
+        {showToast && message && (
+          <div className="fixed top-4 right-4 z-50">
+            <Toast message={message} onClose={() => setShowToast(false)} />
           </div>
         )}
       </main>

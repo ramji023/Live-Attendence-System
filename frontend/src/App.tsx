@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/Admin";
 import Employee from "./pages/Employee";
 import Login from "./pages/Login";
-import Another from "./pages/Another";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
 
         {/* fallback route */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
