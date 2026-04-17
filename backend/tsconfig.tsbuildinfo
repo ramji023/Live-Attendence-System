@@ -1,1 +1,1 @@
-{"root":["./src/server.ts","./src/socket.ts","./src/connection/db.ts","./src/connection/seed.ts","./src/middlewares/auth.middleware.ts","./src/models/attendence.ts","./src/models/employee.ts","./src/routes/attendence/attendence.ts","./src/routes/auth/auth.ts"],"version":"6.0.2"}
+{"root":["./src/server.ts","./src/socket.ts","./src/connection/db.ts","./src/middlewares/auth.middleware.ts","./src/models/attendence.ts","./src/models/employee.ts","./src/routes/attendence/attendence.ts","./src/routes/auth/auth.ts"],"version":"6.0.2"}

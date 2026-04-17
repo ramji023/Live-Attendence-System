@@ -27,11 +27,14 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/v1/auth/login", {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL || "http://localhost:3000"}/api/v1/auth/login`,
+        {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+        },
+      );
 
       console.log("Success:", res.data);
 

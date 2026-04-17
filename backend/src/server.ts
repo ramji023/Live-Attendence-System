@@ -29,14 +29,17 @@ app.use("/api/v1/attendence", attendenceRoutes);
 const httpServer = createServer(app);
 initWebSocketServer(httpServer);
 
+const PORT = process.env.PORT || 3000;
+
 connectDB()
   .then(() => {
     console.log("Connected to MongoDB");
 
-    httpServer.listen(3000, () => {
-      console.log("Server running on port 3000");
+    httpServer.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
+    process.exit(1);
   });

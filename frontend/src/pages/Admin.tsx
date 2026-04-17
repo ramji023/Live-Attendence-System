@@ -62,7 +62,7 @@ export default function AdminDashboard() {
       const queryDate = dateParam || date;
 
       const res = await axios.get(
-        "http://localhost:3000/api/v1/attendence/allRecords",
+        `${import.meta.env.VITE_BASE_URL || "http://localhost:3000"}/api/v1/attendence/allRecord`,
         {
           params: { date: queryDate },
           headers: {

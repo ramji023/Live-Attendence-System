@@ -28,7 +28,7 @@ export default function Employee() {
       const token = useAuthStore.getState().user?.token;
 
       const res = await axios.get(
-        "http://localhost:3000/api/v1/attendence/status",
+        `${import.meta.env.VITE_BASE_URL || "http://localhost:3000"}/api/v1/attendence/status`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
