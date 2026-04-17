@@ -22,7 +22,10 @@ export const authMiddleware = (
     }
 
     // verify token
-    const decoded = jwt.verify(token, "your_secret_key");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET ?? "your_secret_key",
+    );
 
     // attach user with request
     (req as any).user = decoded;
