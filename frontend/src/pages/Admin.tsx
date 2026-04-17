@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   // store date select by admin
-  const [selectedDate, setSelectedDate] = useState<string>(
+  const [selectedDate, _] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
   const user = useAuthStore((s) => s.user);
