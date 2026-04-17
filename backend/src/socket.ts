@@ -8,10 +8,7 @@ interface JoinPayload {
 interface CustomJwtPayload extends JwtPayload {
   id: string;
   role: "admin" | "employee";
-}
-interface AttendancePayload {
-  employeeId: string;
-  action: "IN" | "OUT";
+  name: string;
 }
 
 // store all the active user
@@ -42,6 +39,7 @@ export const initWebSocketServer = (httpServer: HttpServer) => {
       return;
     }
     const employeeId = decoded.id;
+    const employeeName = decoded.name;
     // store active user
     activeUsers.set(employeeId, socket.id);
 
@@ -123,7 +121,7 @@ export const initWebSocketServer = (httpServer: HttpServer) => {
             employeeId,
             action,
             time: new Date(),
-            message: `Employee ${employeeId} checked ${action}`
+            message: `Employee ${employeeName} checked ${action}`,
           });
         } catch (error) {
           console.error(error);

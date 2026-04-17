@@ -7,7 +7,7 @@ export const Toast = ({
 }) => {
   return (
     <div
-      className="flex font-label items-center justify-between gap-3 px-4 py-3.5 rounded-lg min-w-[280px] max-w-md bg-gray-200 border border-none shadow-xl"
+      className="flex font-label items-center justify-between gap-3 px-4 py-3.5 rounded-lg min-w-70 max-w-md bg-gray-200 border border-none shadow-xl"
       role="alert"
     >
       <span className="text-xs font-semibold text-gray-900">{message}</span>

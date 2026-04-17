@@ -47,15 +47,53 @@ router.get("/todayRecord", authMiddleware, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
 
+    //total employee
+    const totalEmployees = await Employee.countDocuments();
+
+    // today attendence
     const records = await Attendance.find({ date: today }).populate(
       "employeeId",
       "name email",
     );
 
+    let presentCount = 0;
+    let lateCount = 0;
+
+    // define 9 AM today
+    const nineAM = new Date();
+    nineAM.setHours(9, 0, 0, 0);
+
+    // calculate count for presentCount and lateCount
+    records.forEach((rec) => {
+      if (rec.checkInTime) {
+        presentCount++;
+
+        if (new Date(rec.checkInTime) > nineAM) {
+          lateCount++;
+        }
+      }
+    });
+
+    // and absent count
+    const absentCount = totalEmployees - presentCount;
+
+    // and attendence percentage
+    const attendancePercentage =
+      totalEmployees === 0
+        ? 0
+        : ((presentCount / totalEmployees) * 100).toFixed(2);
+
+    // return the response to client
     return res.json({
       date: today,
-      count: records.length,
-      data: records,
+      stats: {
+        totalEmployees,
+        present: presentCount,
+        absent: absentCount,
+        late: lateCount,
+        attendancePercentage,
+      },
+      records,
     });
   } catch (error) {
     console.error(error);
@@ -77,10 +115,47 @@ router.get("/allRecords", authMiddleware, async (req, res) => {
       "name email",
     );
 
+    //total employee
+    const totalEmployees = await Employee.countDocuments();
+
+    let presentCount = 0;
+    let lateCount = 0;
+
+    // define 9 AM today
+    const nineAM = new Date();
+    nineAM.setHours(9, 0, 0, 0);
+
+    // calculate count for presentCount and lateCount
+    records.forEach((rec) => {
+      if (rec.checkInTime) {
+        presentCount++;
+
+        if (new Date(rec.checkInTime) > nineAM) {
+          lateCount++;
+        }
+      }
+    });
+
+    // and absent count
+    const absentCount = totalEmployees - presentCount;
+
+    // and attendence percentage
+    const attendancePercentage =
+      totalEmployees === 0
+        ? 0
+        : ((presentCount / totalEmployees) * 100).toFixed(2);
+
+    // return the response to client
     return res.json({
       date,
-      count: records.length,
-      data: records,
+      stats: {
+        totalEmployees,
+        present: presentCount,
+        absent: absentCount,
+        late: lateCount,
+        attendancePercentage,
+      },
+      records,
     });
   } catch (error) {
     console.error(error);
