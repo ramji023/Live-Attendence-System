@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 
 const user = useAuthStore.getState().user;
 
-export const socket = io("http://localhost:3000", {
+export const socket = io(`${import.meta.env.VITE_BASE_URL || "http://localhost:3000"}`, {
   autoConnect: false,
   auth: {
     token: user?.token,
