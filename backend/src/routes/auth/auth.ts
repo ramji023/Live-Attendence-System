@@ -20,7 +20,7 @@ router.post("/login", async (req: Request, res: Response) => {
       name,
       email,
       password,
-      role: email === "admin@example.com" ? "admin" : "employee",,
+      role: email === "admin@example.com" ? "admin" : "employee",
     });
   } else {
     const isMatch = password === employee.password;
