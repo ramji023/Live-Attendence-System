@@ -11,7 +11,7 @@ const app = express(); // initialize express server
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // frotnend url
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // frotnend url
     credentials: true,
   }),
 );
