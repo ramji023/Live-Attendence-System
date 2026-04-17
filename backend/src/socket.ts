@@ -32,7 +32,10 @@ export const initWebSocketServer = (httpServer: HttpServer) => {
     let decoded: CustomJwtPayload;
 
     try {
-      decoded = jwt.verify(token, "your_secret_key") as CustomJwtPayload;
+      decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET ?? "your_secret_key",
+      ) as CustomJwtPayload;
     } catch (err) {
       console.log("Invalid token");
       socket.disconnect();
