@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                   Overall Attendance
                 </p>
                 <h2 className="text-6xl font-headline font-extrabold tracking-tighter mt-2">
-                  {data?.stats.attendancePercentage}
+                  {data?.stats.attendancePercentage}%
                 </h2>
                 <div className="flex items-center gap-2 mt-4 bg-white/10 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
                   <span className="material-symbols-outlined text-sm">
